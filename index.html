@@ -402,7 +402,7 @@
 
     // ADMIN: LOAD & SEARCH SISWA
     function loadAdminSubmissions() {
-        const subs = JSON.parse(fetch('https://your-worker.workers.dev/submissions').then(r=>r.json()).getItem('edunexa_submissions') || '[]');
+        const subs = JSON.parse(fetch('https://edunexa-api.bankgege496.workers.dev/submissions').then(r=>r.json()).getItem('edunexa_submissions') || '[]');
         const sel = document.getElementById('admin-student-select');
         sel.innerHTML = '<option value="">-- Pilih Siswa --</option>';
         subs.forEach((s, i) => sel.add(new Option(`${s.nama} (${s.sekolah}) - ${new Date(s.timestamp).toLocaleDateString('id-ID')}`, i)));
@@ -534,7 +534,7 @@
         };
 
         // SIMPAN (GANTI DENGAN CLOUDFLARE NANTI)
-        await fetch('https://your-worker.workers.dev/submit', {
+        await fetch('https://edunexa-api.bankgege496.workers.dev/submit', {
 		method: 'POST',
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify(payload)
