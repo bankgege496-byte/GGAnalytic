@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUNEXA GG | STRATEGIC ADMISSION 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root { --p-red: #D32F2F; --a-orange: #FF6D00; --dark: #050505; --card: rgba(20, 20, 22, 0.98); }
+        body { background: var(--dark); color: white; font-family: 'Rajdhani', sans-serif; margin: 0; }
+        
+        /* LOGIN OVERLAY */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #000, var(--p-red), var(--a-orange)); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 2px solid var(--a-orange); width: 90%; max-width: 450px; box-shadow: 0 0 30px rgba(255,109,0,0.3); }
+        .login-box h2 { font-family: 'Orbitron'; color: var(--a-orange); text-align: center; margin-bottom: 25px; }
+        .login-box input, .login-box select { background: #000; border: 1px solid #444; color: #00E5FF; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: 'Rajdhani'; margin-bottom: 15px; font-size: 1em; }
+        .login-btn { background: linear-gradient(45deg, var(--p-red), var(--a-orange)); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1.1em; margin-top: 10px; transition: 0.3s; }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,109,0,0.5); }
+        .login-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #444; }
+        .login-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: #888; font-family: 'Orbitron'; font-size: 0.9em; }
+        .login-tab.active { color: var(--a-orange); border-bottom: 2px solid var(--a-orange); }
+        .login-form { display: none; }
+        .login-form.active { display: block; }
+        
+        /* ROLE & UI CLASSES */
+        .role-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; margin-left: 10px; }
+        .badge-admin { background: var(--p-red); color: white; }
+        .badge-user { background: #2E7D32; color: white; }
+        .admin-only { display: none; }
+        .user-only { display: block; }
+        body.admin-mode .admin-only { display: block !important; }
+        body.admin-mode .user-only { display: none !important; }
+        body.user-mode #admin-student-panel { display: none; }
+        body.user-mode #user-confirm { display: block; }
+        body.admin-mode #user-confirm { display: none !important; }
+        
+        /* APP LAYOUT */
+        header { background: linear-gradient(90deg, #000, var(--p-red), var(--a-orange)); padding: 10px; text-align: center; font-family: 'Orbitron'; border-bottom: 2px solid var(--a-orange); display: flex; justify-content: space-between; align-items: center; }
+        .user-info { font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
+        .btn-logout { background: #333; color: #ff6b6b; border: 1px solid #555; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; font-size: 0.9em; }
+        .btn-logout:hover { background: #444; }
+        .tabs { display: flex; justify-content: center; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
+        .tab-btn { padding: 15px 30px; border: none; background: none; color: #666; cursor: pointer; font-family: 'Orbitron'; flex: 1; transition: 0.3s; }
+        .tab-btn.active { color: var(--a-orange); background: #1a1a1a; border-bottom: 3px solid var(--a-orange); }
+        .main-layout { max-width: 1500px; margin: 20px auto; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 20px; padding: 0 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #333; height: fit-content; }
+        input, select { background: #000; border: 1px solid #444; color: #00E5FF; padding: 8px; border-radius: 5px; width: 100%; box-sizing: border-box; font-family: 'Rajdhani'; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        th { color: var(--a-orange); padding: 8px; border-bottom: 1px solid #444; }
+        td { padding: 5px; border-bottom: 1px solid #222; text-align: center; }
+        .jarvis-container { display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .circle-outer { width: 220px; height: 220px; border-radius: 50%; border: 6px dashed var(--a-orange); display: flex; align-items: center; justify-content: center; animation: spin 20s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .circle-inner { width: 180px; height: 180px; border-radius: 50%; background: #000; border: 4px solid var(--a-orange); position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #big-score { font-family: 'Orbitron'; font-size: 3.5em; color: var(--a-orange); margin: 0; }
+        .res-box { margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 0.95em; display: none; line-height: 1.5; }
+        .safe { background: rgba(46, 125, 50, 0.2); border-left: 5px solid #4caf50; }
+        .risk { background: rgba(183, 28, 28, 0.2); border-left: 5px solid #f44336; }
+        .warning { background: rgba(255, 152, 0, 0.2); border-left: 5px solid #ff9800; color: #ffcc80; }
+        .btn-run { background: linear-gradient(45deg, var(--p-red), var(--a-orange)); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; margin-top: 15px; }
+        .cat-tag { font-size: 0.7em; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+        .choice-section { margin-top: 15px; padding: 12px; background: rgba(255,109,0,0.1); border-radius: 8px; border: 1px dashed var(--a-orange); }
+        .choice-section h4 { margin: 0 0 10px 0; color: var(--a-orange); font-family: Orbitron; font-size: 0.95em; }
+        .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+        #user-confirm { width:100%; margin-top:20px; text-align:center; color:#4caf50; display:none; }
+        
+        @media print {
+            #login-screen, .tabs, .tab-btn, .btn-run, #left-side, header, .no-print, input, select, button, #user-confirm, #admin-student-panel { display: none !important; }
+            .main-layout { display: block !important; padding: 0 !important; margin: 0 !important; }
+            #right-side { width: 100% !important; margin: 0 auto !important; }
+            body { background: white !important; color: black !important; }
+            .card { border: none !important; background: white !important; box-shadow: none !important; padding: 0 !important; }
+            #big-score, h2, b, label, p, div { color: black !important; }
+            .circle-inner { border: 4px solid #FF6D00 !important; background: white !important; }
+            .res-box { border: 2px solid #333 !important; background: #f9f9f9 !important; color: black !important; }
+        }
+        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } .choice-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+    <div class="login-box">
+        <h2>🔐 EDUNEXA LOGIN</h2>
+        <div class="login-tabs">
+            <div class="login-tab active" onclick="switchLoginTab('admin')">ADMIN</div>
+            <div class="login-tab" onclick="switchLoginTab('user')">SISWA</div>
+        </div>
+        <form id="form-admin" class="login-form active" onsubmit="handleLogin(event, 'admin')">
+            <input type="text" id="admin-user" placeholder="Username" required>
+            <input type="password" id="admin-pass" placeholder="Password" required>
+            <button type="submit" class="login-btn">MASUK SEBAGAI ADMIN</button>
+        </form>
+        <form id="form-user" class="login-form" onsubmit="handleLogin(event, 'user')">
+            <input type="text" id="user-nama" placeholder="Nama Lengkap Siswa" required>
+            <input type="text" id="user-sekolah" placeholder="Asal Sekolah" required>
+            <button type="submit" class="login-btn">MASUK SEBAGAI SISWA</button>
+        </form>
+        <p style="text-align:center; font-size:0.8em; color:#888; margin-top:20px;">💡 Admin: admin / gege123 • Siswa: Cukup isi data</p>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+    <header>
+        <h1 style="margin:0; font-size:1.3em;">EDUNEXA CORE v6.0</h1>
+        <div class="user-info">
+            <span id="display-role" class="role-badge"></span>
+            <span id="display-name"></span>
+            <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('snbp')">TAB 1: SNBP (RAPOR)</button>
+        <button class="tab-btn" onclick="switchTab('snbt')">TAB 2: SNBT (UTBK)</button>
+        <button class="tab-btn" onclick="switchTab('mpps')">TAB 3: DATABASE MPPS</button>
+    </div>
+
+    <!-- ADMIN: PEMILIH SISWA -->
+    <div id="admin-student-panel" class="admin-only" style="max-width:1500px; margin:15px auto; padding:0 20px;">
+        <div class="card" style="background:#111; border-color:#444;">
+            <h3 style="margin:0 0 10px 0; color:var(--a-orange); font-family:Orbitron;">🔍 PILIH DATA SISWA (ADMIN)</h3>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="search-admin-student" placeholder="Ketik nama siswa..." onkeyup="filterAdminStudents()" style="flex:2;">
+                <select id="admin-student-select" onchange="loadStudentForAdmin()" style="flex:1;"><option value="">-- Pilih Siswa --</option></select>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-layout" id="layout-input">
+        <div id="left-side">
+            <div id="pane-snbp" class="card">
+                <h2 style="color:var(--a-orange); font-family:Orbitron;">INPUT RAPOR (SMT 1-5)</h2>
+                <table>
+                    <thead><tr><th>Mapel Utama</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>AVG</th></tr></thead>
+                    <tbody id="snbp-rows"></tbody>
+                </table>
+                
+                <h2 style="color:var(--a-orange); font-family:Orbitron; margin-top:25px;">TKA 2026 (PELENGKAP)</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div><label>Matematika</label><input type="number" id="tka-mtk" class="tka-snbp" oninput="calcTotalSNBP()"></div>
+                    <div><label>B. Inggris</label><input type="number" id="tka-eng" class="tka-snbp" oninput="calcTotalSNBP()"></div>
+                    <div><label>B. Indonesia</label><input type="number" id="tka-ind" class="tka-snbp" oninput="calcTotalSNBP()"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 100px 1fr 100px; gap: 10px; margin-top: 10px;">
+                    <div><label>Pilihan 1</label><select id="p1-type"><option value="eksakta">Kimia/Fisika/Bio</option><option value="soshum">Eko/Geo/Sos</option></select></div>
+                    <div><label>Nilai</label><input type="number" id="p1-val" class="tka-snbp" oninput="calcTotalSNBP()"></div>
+                    <div><label>Pilihan 2</label><select id="p2-type"><option value="eksakta">Kimia/Fisika/Bio</option><option value="soshum">Eko/Geo/Sos</option></select></div>
+                    <div><label>Nilai</label><input type="number" id="p2-val" class="tka-snbp" oninput="calcTotalSNBP()"></div>
+                </div>
+
+                <!-- 2 PILIHAN JURUSAN -->
+                <div class="choice-section">
+                    <h4>📝 PILIHAN SISWA (2 PTN & JURUSAN)</h4>
+                    <div class="choice-row">
+                        <div><label>PTN 1</label><select id="stu-univ-1" onchange="fillStuProdi(1)"><option value="">-- Pilih PTN --</option></select></div>
+                        <div><label>Prodi 1</label><select id="stu-prodi-1"><option value="">-- Pilih Prodi --</option></select></div>
+                    </div>
+                    <div class="choice-row">
+                        <div><label>PTN 2</label><select id="stu-univ-2" onchange="fillStuProdi(2)"><option value="">-- Pilih PTN --</option></select></div>
+                        <div><label>Prodi 2</label><select id="stu-prodi-2"><option value="">-- Pilih Prodi --</option></select></div>
+                    </div>
+                </div>
+                
+                <button class="btn-run admin-only" onclick="generateAdminAnalysis('snbp')">🚀 START ANALYSIS (ADMIN)</button>
+                <button class="btn-run user-only" onclick="submitUserData()">✅ SIMPAN DATA (SISWA)</button>
+            </div>
+
+            <div id="pane-snbt" class="card" style="display:none;">
+                <h2 style="color:var(--a-orange); font-family:Orbitron;">INPUT SKOR UTBK (0-1000)</h2>
+                <div id="utbk-fields"></div>
+                
+                <div class="choice-section user-only">
+                    <h4>📝 PILIHAN SISWA (2 PTN & JURUSAN)</h4>
+                    <div class="choice-row">
+                        <div><label>PTN 1</label><select id="stu-univ-1-s" onchange="fillStuProdiS(1)"><option value="">-- Pilih PTN --</option></select></div>
+                        <div><label>Prodi 1</label><select id="stu-prodi-1-s"><option value="">-- Pilih Prodi --</option></select></div>
+                    </div>
+                    <div class="choice-row">
+                        <div><label>PTN 2</label><select id="stu-univ-2-s" onchange="fillStuProdiS(2)"><option value="">-- Pilih PTN --</option></select></div>
+                        <div><label>Prodi 2</label><select id="stu-prodi-2-s"><option value="">-- Pilih Prodi --</option></select></div>
+                    </div>
+                </div>
+                
+                <button class="btn-run admin-only" onclick="generateAdminAnalysis('snbt')">🚀 START ANALYSIS (ADMIN)</button>
+                <button class="btn-run user-only" onclick="submitUserData()">✅ SIMPAN DATA (SISWA)</button>
+            </div>
+        </div>
+
+        <div id="right-side">
+            <div class="card jarvis-container">
+                <div style="width:100%; margin-bottom:15px;">
+                    <label style="font-size: 0.8em; color: #888;">NAMA SISWA:</label>
+                    <input type="text" id="nama-siswa" placeholder="Masukkan nama siswa..." style="border-bottom: 2px solid var(--a-orange); background: transparent;" disabled>
+                </div>
+
+                <div class="circle-outer">
+                    <div class="circle-inner">
+                        <small style="color:#888; letter-spacing:2px">STRATEGIC AVG</small>
+                        <h1 id="big-score">0</h1>
+                    </div>
+                </div>
+
+                <div id="status-box" class="res-box admin-only"></div>
+                <div id="rec-box" style="width:100%; margin-top:20px;" class="admin-only"></div>
+                <div id="user-confirm">✅ <b>Data berhasil disimpan!</b><br><small style="color:#888">Silakan hubungi Admin untuk melihat hasil analisa.</small></div>
+                
+                <div class="no-print admin-only" style="width:100%; margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                    <label>Univ Tujuan</label><select id="univ-target" onchange="updateProdi()"></select>
+                    <label style="margin-top:10px; display:block;">Prodi Tujuan</label><select id="prodi-target"></select>
+                </div>
+
+                <button onclick="window.print()" class="btn-run admin-only" style="background: #222; border: 1px solid #444; margin-top: 10px;">🖨️ PRINT REPORT (PDF)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pane-mpps" style="display:none; padding:20px;">
+        <div class="card">
+            <h2 style="font-family:Orbitron; color:var(--a-orange);">DATABASE JURUSAN (MPPS)</h2>
+            <input type="text" id="search-mpps" placeholder="Cari Prodi atau Kampus..." onkeyup="filterMPPS()">
+            <div style="max-height: 500px; overflow-y: auto; margin-top:15px;">
+                <table id="mpps-table"><thead><tr><th>PRODI</th><th>UNIV</th><th>RUMPUN</th><th>PG</th><th>KEKETATAN</th></tr></thead><tbody id="mpps-body"></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⚠️ SCRIPT ASLI 100% TIDAK DIUBAH -->
+<script src="data.js"></script>
+<script>
+    const db = ptnData;
+    const mapels = ["B. Indonesia", "B. Inggris", "Matematika", "Fisika/Geografi", "Kimia/Ekonomi", "Biologi/Sosiologi"];
+    const subtes = ["Penalaran Matematika", "Pengetahuan Kuantitatif", "Literasi B. Indonesia", "Literasi B. Inggris", "Penalaran Umum", "Memahami Bacaan & Menulis"];
+
+    function init() {
+        const snbpBody = document.getElementById('snbp-rows');
+        mapels.forEach((m, i) => {
+            snbpBody.innerHTML += `<tr><td><b>${m}</b></td>${[1,2,3,4,5].map(s => `<td><input type="number" class="r-in r-${i}" oninput="calcTotalSNBP()"></td>`).join('')}<td id="avg-${i}" style="color:var(--a-orange)">0</td></tr>`;
+        });
+        const utbkBox = document.getElementById('utbk-fields');
+        subtes.forEach((s, i) => {
+            utbkBox.innerHTML += `<div style="display:flex; align-items:center; margin-bottom:10px;"><label style="flex:1">${s}</label><input type="number" class="u-in" oninput="calcTotalSNBT()" style="width:100px"> <span class="cat-tag" style="width:80px; text-align:center; margin-left:10px;">-</span></div>`;
+        });
+        const selUniv = document.getElementById('univ-target');
+        [...new Set(db.map(x => x.Universitas))].sort().forEach(u => selUniv.add(new Option(u, u)));
+        updateProdi();
+        filterMPPS();
+    }
+
+    function switchTab(t) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('layout-input').style.display = t === 'mpps' ? 'none' : 'grid';
+        document.getElementById('pane-mpps').style.display = t === 'mpps' ? 'block' : 'none';
+        document.getElementById('pane-snbp').style.display = t === 'snbp' ? 'block' : 'none';
+        document.getElementById('pane-snbt').style.display = t === 'snbt' ? 'block' : 'none';
+    }
+
+    function calcTotalSNBP() {
+        let sum = 0, count = 0;
+        for(let i=0; i<6; i++) {
+            let rowSum = 0, rowC = 0;
+            document.querySelectorAll(`.r-${i}`).forEach(input => { if(input.value) { rowSum += parseFloat(input.value); rowC++; } });
+            let rowAvg = rowC > 0 ? rowSum/rowC : 0;
+            document.getElementById(`avg-${i}`).innerText = rowAvg.toFixed(2);
+            if(rowAvg > 0) { sum += rowAvg; count++; }
+        }
+        document.getElementById('big-score').innerText = count > 0 ? (sum/count).toFixed(2) : 0;
+    }
+
+    function calcTotalSNBT() {
+        let sum = 0, count = 0;
+        document.querySelectorAll('.u-in').forEach(input => {
+            let v = parseFloat(input.value);
+            let tag = input.nextElementSibling;
+            if(v) {
+                sum += v; count++;
+                if(v >= 750) { tag.innerText="Istimewa"; tag.style.background="#D4AF37"; }
+                else if(v >= 600) { tag.innerText="Baik"; tag.style.background="#2E7D32"; }
+                else if(v >= 450) { tag.innerText="Memadai"; tag.style.background="#F9A825"; }
+                else { tag.innerText="Kurang"; tag.style.background="#C62828"; }
+            }
+        });
+        document.getElementById('big-score').innerText = count > 0 ? (sum/count).toFixed(1) : 0;
+    }
+
+    function updateProdi() {
+        const u = document.getElementById('univ-target').value;
+        const p = document.getElementById('prodi-target');
+        p.innerHTML = '';
+        db.filter(x => x.Universitas === u).forEach(x => p.add(new Option(x.Jurusan, x.PG)));
+    }
+
+    function runAnalysis(mode) {
+        const score = parseFloat(document.getElementById('big-score').innerText);
+        const targetPG = parseFloat(document.getElementById('prodi-target').value);
+        const targetName = document.getElementById('prodi-target').options[document.getElementById('prodi-target').selectedIndex].text;
+        const status = document.getElementById('status-box');
+        const rec = document.getElementById('rec-box');
+        let competencyMsg = ""; let isMatch = true;
+        if(mode === 'snbt') {
+            const pk = parseFloat(document.querySelectorAll('.u-in')[1].value) || 0;
+            const lbi = parseFloat(document.querySelectorAll('.u-in')[2].value) || 0;
+            if(targetName.includes("Kedokteran") || targetName.includes("Teknik")) { if(pk < 600) { isMatch = false; competencyMsg = "⚠️ <b>Warning:</b> Nilai Kuantitatif/Matematika Anda di bawah standar rumpun Eksakta."; } }
+            else if(targetName.includes("Hukum") || targetName.includes("Sosiologi")) { if(lbi < 600) { isMatch = false; competencyMsg = "⚠️ <b>Warning:</b> Literasi Bahasa Indonesia Anda rendah untuk rumpun Soshum/Hukum."; } }
+        }
+        const strategicScore = mode === 'snbp' ? score * 7.55 : score;
+        const diff = strategicScore - targetPG;
+        status.style.display = "block";
+        if(!isMatch) { status.className = "res-box warning"; status.innerHTML = competencyMsg; }
+        else if(diff >= -10) { status.className = "res-box safe"; status.innerHTML = `✅ <b>STRATEGI AMAN.</b> Skor Strategis: ${strategicScore.toFixed(1)} vs PG: ${targetPG.toFixed(1)}.`; }
+        else { status.className = "res-box risk"; status.innerHTML = `❌ <b>RISIKO TINGGI.</b> Skor Anda masih di bawah standar PG. Disarankan cari alternatif.`; }
+        rec.innerHTML = "<h4>SMART RECOMMENDATIONS:</h4>";
+        db.filter(x => x.PG <= strategicScore + 10 && x.PG >= strategicScore - 40).sort((a,b) => b.Keketatan - a.Keketatan).slice(0, 3).forEach(r => { rec.innerHTML += `<div style="background:#222; padding:10px; border-radius:5px; margin-bottom:8px; border-left:3px solid var(--a-orange)"><b>${r.Jurusan}</b> - ${r.Universitas}<br><small>PG: ${r.PG.toFixed(0)} | Peluang: ${(85 + (strategicScore-r.PG)/2).toFixed(1)}%</small></div>`; });
+    }
+
+    function filterMPPS() {
+        const key = document.getElementById('search-mpps').value.toUpperCase();
+        const b = document.getElementById('mpps-body'); b.innerHTML = '';
+        db.filter(x => x.Jurusan.toUpperCase().includes(key) || x.Universitas.toUpperCase().includes(key)).slice(0, 50).forEach(x => { b.innerHTML += `<tr><td>${x.Jurusan}</td><td>${x.Universitas}</td><td>${x.rumpun}</td><td>${x.PG.toFixed(1)}</td><td>${x.Keketatan.toFixed(1)}%</td></tr>`; });
+    }
+
+    window.onload = init;
+</script>
+
+<!-- 🔧 LOGIKA TAMBAHAN: LOGIN, ADMIN FLOW, AUTO-FILL, CLOUDFLARE MOCK -->
+<script>
+    let currentUser = null;
+    let activeStudentData = null;
+
+    // LOGIN SYSTEM
+    function switchLoginTab(role) {
+        document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+        document.getElementById(`form-${role}`).classList.add('active');
+    }
+
+    function handleLogin(e, role) {
+        e.preventDefault();
+        if(role === 'admin') {
+            if(document.getElementById('admin-user').value === 'admin' && document.getElementById('admin-pass').value === 'gege123') {
+                currentUser = { role: 'admin', name: 'Administrator' };
+            } else { alert('❌ Username/Password salah!'); return; }
+        } else {
+            const nama = document.getElementById('user-nama').value.trim();
+            const sekolah = document.getElementById('user-sekolah').value.trim();
+            if(!nama || !sekolah) { alert('❌ Isi nama & sekolah!'); return; }
+            currentUser = { role: 'user', name: nama, school: sekolah };
+        }
+        activateApp();
+    }
+
+    function activateApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.body.classList.add(currentUser.role === 'admin' ? 'admin-mode' : 'user-mode');
+        document.getElementById('display-role').innerText = currentUser.role === 'admin' ? 'ADMIN' : 'SISWA';
+        document.getElementById('display-role').className = `role-badge ${currentUser.role === 'admin' ? 'badge-admin' : 'badge-user'}`;
+        document.getElementById('display-name').innerText = currentUser.name;
+        document.getElementById('nama-siswa').value = currentUser.name;
+        sessionStorage.setItem('edunexa_user', JSON.stringify(currentUser));
+        
+        populateStuChoices();
+        if(currentUser.role === 'admin') loadAdminSubmissions();
+    }
+
+    function logout() {
+        if(confirm('Yakin logout?')) {
+            currentUser = null; activeStudentData = null;
+            sessionStorage.removeItem('edunexa_user');
+            document.body.className = '';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.querySelectorAll('.login-form input').forEach(i => i.value = '');
+            switchLoginTab('admin');
+        }
+    }
+
+    // DROPDOWN 2 PILIHAN
+    function populateStuChoices() {
+        if(typeof ptnData === 'undefined') return;
+        const univs = [...new Set(ptnData.map(x => x.Universitas))].sort();
+        ['stu-univ-1','stu-univ-2','stu-univ-1-s','stu-univ-2-s'].forEach(id => {
+            const sel = document.getElementById(id);
+            if(sel) { sel.innerHTML = '<option value="">-- Pilih PTN --</option>'; univs.forEach(u => sel.add(new Option(u, u))); }
+        });
+    }
+    function fillStuProdi(n) { updateStuProdi('stu', n, ''); }
+    function fillStuProdiS(n) { updateStuProdi('stu', n, '-s'); }
+    function updateStuProdi(prefix, n, suffix) {
+        const univ = document.getElementById(`${prefix}-univ-${n}${suffix}`).value;
+        const prodiSel = document.getElementById(`${prefix}-prodi-${n}${suffix}`);
+        if(!univ || !prodiSel || typeof ptnData === 'undefined') return;
+        prodiSel.innerHTML = '<option value="">-- Pilih Prodi --</option>';
+        ptnData.filter(x => x.Universitas === univ).forEach(x => prodiSel.add(new Option(x.Jurusan, x.PG)));
+    }
+
+    // ADMIN: LOAD & SEARCH SISWA
+    function loadAdminSubmissions() {
+        const subs = JSON.parse(fetch('https://your-worker.workers.dev/submissions').then(r=>r.json()).getItem('edunexa_submissions') || '[]');
+        const sel = document.getElementById('admin-student-select');
+        sel.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+        subs.forEach((s, i) => sel.add(new Option(`${s.nama} (${s.sekolah}) - ${new Date(s.timestamp).toLocaleDateString('id-ID')}`, i)));
+    }
+
+    function filterAdminStudents() {
+        const q = document.getElementById('search-admin-student').value.toLowerCase();
+        const opts = document.getElementById('admin-student-select').options;
+        const subs = JSON.parse(localStorage.getItem('edunexa_submissions') || '[]');
+        let matchIdx = -1;
+        for(let i=0; i<opts.length; i++) {
+            if(opts[i].text.toLowerCase().includes(q)) matchIdx = i;
+        }
+        if(matchIdx > 0) document.getElementById('admin-student-select').value = matchIdx;
+    }
+
+    function loadStudentForAdmin() {
+        const idx = document.getElementById('admin-student-select').value;
+        if(!idx && idx !== 0) { activeStudentData = null; return; }
+        const subs = JSON.parse(localStorage.getItem('edunexa_submissions') || '[]');
+        activeStudentData = subs[parseInt(idx)];
+        if(!activeStudentData) return;
+
+        // Switch tab sesuai mode siswa
+        switchTab(activeStudentData.mode === 'snbt' ? 'snbt' : 'snbp');
+        
+        // Auto-fill Rapor/TKA
+        if(activeStudentData.mode === 'snbp') {
+            activeStudentData.rapor.forEach((row, i) => {
+                row.forEach((val, j) => {
+                    const inp = document.querySelectorAll(`.r-${i}`)[j];
+                    if(inp) inp.value = val;
+                });
+            });
+            if(activeStudentData.tka) {
+                ['tka-mtk','tka-eng','tka-ind','p1-val','p2-val'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el && activeStudentData.tka[id.replace('tka-','')?.replace('val','').replace('mtk','mtk').replace('eng','eng').replace('ind','ind')]) el.value = activeStudentData.tka[id.replace('tka-','')] || '';
+                });
+                document.getElementById('p1-type').value = activeStudentData.tka.p1_type || 'eksakta';
+                document.getElementById('p2-type').value = activeStudentData.tka.p2_type || 'soshum';
+                document.getElementById('tka-mtk').value = activeStudentData.tka.mtk || '';
+                document.getElementById('tka-eng').value = activeStudentData.tka.eng || '';
+                document.getElementById('tka-ind').value = activeStudentData.tka.ind || '';
+            }
+            calcTotalSNBP();
+        } else {
+            activeStudentData.utbk.forEach((val, i) => {
+                const inp = document.querySelectorAll('.u-in')[i];
+                if(inp) inp.value = val;
+            });
+            calcTotalSNBT();
+        }
+
+        // Auto-fill Choices
+        if(activeStudentData.choices) {
+            activeStudentData.choices.forEach((c, i) => {
+                const suffix = activeStudentData.mode === 'snbt' ? '-s' : '';
+                const uSel = document.getElementById(`stu-univ-${i+1}${suffix}`);
+                if(uSel) uSel.value = c.ptn;
+                const pSel = document.getElementById(`stu-prodi-${i+1}${suffix}`);
+                if(pSel) {
+                    updateStuProdi('stu', i+1, suffix);
+                    setTimeout(() => pSel.value = c.pg, 50);
+                }
+            });
+        }
+        alert(`✅ Data ${activeStudentData.nama} berhasil dimuat. Klik "START ANALYSIS" untuk hitung peluang.`);
+    }
+
+    // ADMIN ANALYSIS WRAPPER
+    function generateAdminAnalysis(mode) {
+        if(!activeStudentData) { alert('⚠️ Pilih siswa terlebih dahulu!'); return; }
+        
+        // Set target admin ke pilihan 1 siswa
+        const target = activeStudentData.choices[0];
+        if(target) {
+            document.getElementById('univ-target').value = target.ptn;
+            updateProdi();
+            setTimeout(() => document.getElementById('prodi-target').value = target.pg, 50);
+        }
+        
+        // Jalankan fungsi asli runAnalysis
+        runAnalysis(mode);
+    }
+
+    // SISWA: SAVE DATA
+    function submitUserData() {
+        if(currentUser?.role !== 'user') return;
+        const mode = document.getElementById('pane-snbp').style.display !== 'none' ? 'snbp' : 'snbt';
+        const suffix = mode === 'snbt' ? '-s' : '';
+        
+        // Kumpulkan Rapor/UTBK
+        const rapor = [];
+        if(mode === 'snbp') {
+            for(let i=0; i<6; i++) {
+                let row = [];
+                document.querySelectorAll(`.r-${i}`).forEach(inp => row.push(parseFloat(inp.value)||0));
+                rapor.push(row);
+            }
+        }
+        const utbk = [];
+        if(mode === 'snbt') {
+            document.querySelectorAll('.u-in').forEach(inp => utbk.push(parseFloat(inp.value)||0));
+        }
+        
+        const choices = [];
+        for(let i=1; i<=2; i++) {
+            const u = document.getElementById(`stu-univ-${i}${suffix}`).value;
+            const pText = document.getElementById(`stu-prodi-${i}${suffix}`)?.options[document.getElementById(`stu-prodi-${i}${suffix}`).selectedIndex]?.text;
+            const pVal = document.getElementById(`stu-prodi-${i}${suffix}`).value;
+            if(u && pText) choices.push({ ptn: u, prodi: pText, pg: parseFloat(pVal)||0 });
+        }
+        
+        const payload = {
+            id: `sub_${Date.now()}`,
+            nama: currentUser.name, sekolah: currentUser.school,
+            mode, rapor: mode==='snbp'?rapor:null, utbk: mode==='snbt'?utbk:null,
+            tka: mode==='snbp' ? {
+                mtk: document.getElementById('tka-mtk').value,
+                eng: document.getElementById('tka-eng').value,
+                ind: document.getElementById('tka-ind').value,
+                p1_type: document.getElementById('p1-type').value,
+                p1_val: document.getElementById('p1-val').value,
+                p2_type: document.getElementById('p2-type').value,
+                p2_val: document.getElementById('p2-val').value
+            } : null,
+            choices, timestamp: new Date().toISOString()
+        };
+
+        // SIMPAN (GANTI DENGAN CLOUDFLARE NANTI)
+        await fetch('https://your-worker.workers.dev/submit', {
+		method: 'POST',
+		headers: {'Content-Type': 'application/json'},
+		body: JSON.stringify(payload)
+		});
+        
+        document.getElementById('user-confirm').style.display = 'block';
+        setTimeout(()=> document.getElementById('user-confirm').style.display='none', 5000);
+        alert('✅ Data tersimpan lokal! Admin bisa langsung akses setelah login.');
+    }
+
+    // Restore session
+    window.addEventListener('DOMContentLoaded', () => {
+        const saved = sessionStorage.getItem('edunexa_user');
+        if(saved) { currentUser = JSON.parse(saved); activateApp(); }
+    });
+</script>
+</body>
+</html>
